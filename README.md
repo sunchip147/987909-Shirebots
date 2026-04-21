@@ -1,17 +1,18 @@
-# 🤖 98709 Robotics — VEX V5 Code Repository
+#98709 Shirebots — VEX V5 Code Repository & Resource Hub
 
-Welcome to the official code repository for **98709 Robotics**! This is the shared hub for all sub-teams in the organization. Each team has their own dedicated folder for source code and autonomous routines, and everyone pulls from a shared odometry library at the root level.
+Welcome to the official code and resource repository for **98709 Shirebots**! This is the shared hub for all sub-teams in the organization. Each team has their own dedicated folder for source code and autonomous routines, and everyone pulls from a shared odometry library at the root level.
 
 All programming is done in **Visual Studio Code** with the **VEX V5 Python extension** connected to this remote repository.
+This is also a place to put documentation items and resources that are pertinent to the robotics season.
 
 ---
 
-## 📁 Repository Structure
+##Repository Structure
 
 ```
-📦 98709-robotics/
+98709-robotics/
 │
-├── 📂 lib/                            # ⭐ Shared library — all teams use this
+├── 📂 lib/                            # **Shared library** — all teams use this
 │   ├── odometry.py                    # Core odometry (position tracking, movement)
 │   ├── pid.py                         # PID controller (used by all drivetrain code)
 │   ├── drivetrain.py                  # Shared drivetrain helpers
@@ -74,9 +75,9 @@ All programming is done in **Visual Studio Code** with the **VEX V5 Python exten
 
 ---
 
-## 🔗 How the Shared Library Works
+## How the Shared Library Works
 
-Each team's autonomous routines import directly from the shared `lib/` folder at the repo root. This means odometry, PID, and drivetrain logic only needs to be written and fixed **once** — all teams benefit automatically.
+Each team's autonomous routines import directly from the shared `lib/` folder at the repo root. This means odometry, PID, and drivetrain code only needs to be written and fixed **once** — all teams benefit automatically.
 
 ### Example — how an autonomous file imports from `lib/`
 
@@ -110,7 +111,7 @@ run()
 
 ```python
 # lib/odometry.py
-# ⚠️ Shared across ALL 98709 teams — edit carefully, changes affect everyone!
+# Shared across ALL 98709 teams — edit carefully, changes affect everyone!
 
 from vex import *
 
@@ -143,11 +144,11 @@ class Odometry:
         pass
 ```
 
-> ⚠️ **Before editing anything in `lib/`** — give all team leads a heads-up. A bug here breaks every team's autonomous. Always work on a branch and open a Pull Request (see branching section below).
+> ⚠️ **Before editing anything in `lib/`** — give all team leads a heads-up. An issue here breaks every team's autonomous. Always work on a branch and open a Pull Request (see branching section below).
 
 ---
 
-## ⚙️ Setup Guide — Getting Started (Read This First!)
+## Setup Guide — Getting Started (Read This First!)
 
 ### Step 1 — Install required tools
 
