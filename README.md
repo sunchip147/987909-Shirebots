@@ -144,7 +144,7 @@ class Odometry:
         pass
 ```
 
-> ⚠️ **Before editing anything in `lib/`** — give all team leads a heads-up. An issue here breaks every team's autonomous. Always work on a branch and open a Pull Request (see branching section below).
+> **Before editing anything in `lib/`** — give all team leads a heads-up. An issue here breaks every team's autonomous. Always work on a branch and open a Pull Request (see branching section below).
 
 ---
 
@@ -179,7 +179,7 @@ This tags your commits so the team can see who changed what.
 
 ---
 
-## 🔄 Daily Workflow
+## Daily Workflow
 
 Follow this **every time** you sit down to code — no skipping steps.
 
@@ -208,7 +208,7 @@ git push
 
 ---
 
-## 🤝 Collaboration Rules
+## Collaboration Rules
 
 - **Stay in your team's folder.** Don't edit another team's files without asking.
 - **Never edit `lib/` alone.** Talk to all team leads first — it affects every robot.
@@ -219,7 +219,7 @@ git push
 
 ---
 
-## 🧠 Code Conventions
+## Code Conventions
 
 ```python
 # ✅ Good — descriptive names, typed arguments, docstring
@@ -265,7 +265,7 @@ Then open a **Pull Request** on GitHub so all leads can review before it merges.
 
 ---
 
-## 🤖 VEX V5 Quick Reference
+## VEX V5 Quick Reference
 
 ### Shared `lib/` files
 
@@ -287,7 +287,7 @@ Then open a **Pull Request** on GitHub so all leads can review before it merges.
 
 ---
 
-## ❓ Getting Help
+## Getting Help
 
 - **VEX Python API docs** → [api.vex.com](https://api.vex.com/)
 - **VEX community forum** → [vexforum.com](https://www.vexforum.com/)
@@ -295,15 +295,4 @@ Then open a **Pull Request** on GitHub so all leads can review before it merges.
 - **Stuck on a bug?** → Post in the team chat with your error message and what you've already tried
 
 ---
-
-## 👥 Teams & Contacts
-
-| Team | Lead Programmer | GitHub |
-|------|----------------|--------|
-| 98709A | [Name] | @username |
-| 98709B | [Name] | @username |
-| 98709C | [Name] | @username |
-
----
-
 *Last updated: April 2026 — 98709 Robotics*
