@@ -7,7 +7,7 @@ This is also a place to put documentation items and resources that are pertinent
 
 ---
 
-##Repository Structure
+## Repository Structure
 
 ```
 98709-robotics/
@@ -222,7 +222,7 @@ git push
 ## Code Conventions
 
 ```python
-# ✅ Good — descriptive names, typed arguments, docstring
+# Good — descriptive names, typed arguments, docstring
 DRIVE_SPEED  = 75       # percent — tuned for competition tiles
 TURN_TIMEOUT = 2000     # ms — prevents infinite loop on failed turn
 
@@ -233,7 +233,7 @@ def score_preload(odom: Odometry) -> None:
 ```
 
 ```python
-# ❌ Bad — unclear names, no comments, no types
+# Bad — unclear names, no comments, no types
 def f(o):
     o.drive_to(500, 0)
     o.turn_to(45)
@@ -247,7 +247,7 @@ def f(o):
 
 ---
 
-## 🚦 Branching — Required for `lib/` Changes
+## Branching — Required for `lib/` Changes
 
 If you're experimenting or modifying the shared `lib/` folder, always work on a branch:
 
@@ -289,10 +289,10 @@ Then open a **Pull Request** on GitHub so all leads can review before it merges.
 
 ## Getting Help
 
-- **VEX Python API docs** → [api.vex.com](https://api.vex.com/)
+- **VEX Python API docs** → [api.vex.com](https://api.vex.com/v5/home/)
 - **VEX community forum** → [vexforum.com](https://www.vexforum.com/)
 - **Git beginner guide** → [rogerdudler.github.io/git-guide](https://rogerdudler.github.io/git-guide/)
-- **Stuck on a bug?** → Post in the team chat with your error message and what you've already tried
+- **Stuck on an issue?** → Post in the team chat with your error message and what you've already tried
 
 ---
 *Last updated: April 2026 — 98709 Robotics*
