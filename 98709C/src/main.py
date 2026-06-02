@@ -365,8 +365,7 @@ def pre_autonomous():
     inertial_sensor.calibrate()
 
 def autonomous():
-
-    set_position(0, 0, 0)
+    brain.screen.print("yolo")
 
     drive_to(24, 0)
     turn_to_angle(90)
