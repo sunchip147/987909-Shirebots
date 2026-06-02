@@ -366,7 +366,7 @@ def pre_autonomous():
 
 def autonomous():
     brain.screen.print("yolo")
-
+    drive_to(5,7)
     drive_to(24, 0)
     turn_to_angle(90)
     drive_to(24, 24)
