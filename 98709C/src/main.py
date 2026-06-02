@@ -364,13 +364,21 @@ def pre_autonomous():
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
-def autonomous():
+def autonomous(preset):
     brain.screen.print("yolo")
-    drive_to(5,7)
-    drive_to(24, 0)
-    turn_to_angle(90)
-    drive_to(24, 24)
-    turn_to_point(0, 24)
+    
+    if preset == "test":
+        drive_to(5,7)
+        drive_to(24, 0)
+        turn_to_angle(90)
+        drive_to(24, 24)
+        turn_to_point(0, 24)
+    elif preset == "topToggleLeft":
+        toggleToBlue
+        turn_to_point(-23,72)
+        dropPin
+        grabGroup
+        drive_to(-22, 71)
 
 """### User Control"""
 
