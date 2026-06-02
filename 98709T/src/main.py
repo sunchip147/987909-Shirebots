@@ -32,7 +32,7 @@ conveyor = Motor(Ports.PORT10, GearSetting.RATIO_6_1, False)
 intake = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
 
 # Odometry Sensors
-#inertial_sensor = Inertial(Ports.PORT18)
+inertial_sensor = Inertial(Ports.PORT18)
 forward_tracker = Rotation(Ports.PORT5, False)
 sideways_tracker = Rotation(Ports.PORT17, False)
 
@@ -366,6 +366,11 @@ def pre_autonomous():
 
 def autonomous():
     brain.screen.print("yolo")
+
+    drive_to(24, 0)
+    turn_to_angle(90)
+    drive_to(24, 24)
+    turn_to_point(0, 24)
 
 """### User Control"""
 
