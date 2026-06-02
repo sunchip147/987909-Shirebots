@@ -379,6 +379,11 @@ def autonomous(preset):
         dropPin
         grabGroup
         drive_to(-22, 71)
+        turn_to_point (-24,48)
+        drive_to (-22,49)
+        dropGroup
+        
+        
 
 """### User Control"""
 
