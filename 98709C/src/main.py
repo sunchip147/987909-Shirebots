@@ -389,7 +389,6 @@ def autonomous(preset):
         turn_to_point (-24,48)
         drive_to (-22,49)
         dropGroup(2)
-    
         
         
 
