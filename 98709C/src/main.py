@@ -413,6 +413,7 @@ def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, 
         time.sleep(0.01)
 
     lift.stop(HOLD)
+
 def scoreGroup(groupNumber):
     lift_to_position(90*groupNumber) #Placeholder values, will need to be tuned
     claw(True)
@@ -420,10 +421,10 @@ def scoreGroup(groupNumber):
     lift_to_position(0)
 
 def dropPin():
-    lift.spin(REVERSE, 12, PERCENT)
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for dropping just a pin into a goal.
+    time.sleep(0.5) 
+    claw(False) #Opens the claw to drop the pin, will need to be tuned to make sure it drops the pin without dropping the whole group.
     time.sleep(0.5)
-    claw(False)
-
 
 def grabGroup():
     time.sleep(0.5)
@@ -455,13 +456,13 @@ def autonomous(preset):
         drive_to(-22, 71)
         turn_to_point (-24,48)
         drive_to (-22,49)
-        dropGroup(1)
+        scoreGroup(1)
         turn_to_point (-24,72)
         drive_to (-22,70)
         grabGroup()
         turn_to_point (-24,48)
         drive_to (-22,49)
-        dropGroup(2)
+        scoreGroup(2)
     
         
 """### User Control"""
