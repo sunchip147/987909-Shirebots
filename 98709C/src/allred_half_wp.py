@@ -434,36 +434,55 @@ def pre_autonomous():
     inertial_sensor.calibrate()
 
 def autonomous():
-    brain.screen.print("yolo")
     intake.spin(FORWARD, 95, PERCENT)
+    #Turning to score preloads
     turn_to_point(-24,24)
+    #Scoring the preload
     drive_to(-20, 20)
     dropPin()
+    #Turning to pick up the next group
     turn_to_point(-24,0)
+    #Grabbing the wall group
     drive_to(-24, 4)
-    scoreGroup()
-    turn_to_point(-24,24)
-    drive_to(-24, 20)
-    scoreGroup(1)
-    drive_to(-20,20)
-    drive_to(-20,44)
-    turn_to_angle(135)
-    scoreGroup()    
-    drive_to(-20,28)
-    turn_to_point(-24,24)
-    scoreGroup(2)  
-    drive_to(-48,28)
-    turn_to_point(-48,24)
-    turn_to_angle(180)
-    dropPin()
-    drive_to(-48,44)
-    turn_to_point(-48,48)
-    dropPin()
-    drive_to(-68,48)
-    turn_to_point(-66,48)
     grabGroup()
-    drive_to(-48,46)
+    #Turning to score the second group
+    turn_to_point(-24,24)
+    #Scoring the second group
+    set_drive_voltage(5)
+    time.wait(0.5, MSEC)
     scoreGroup(1)
+
+    #Turning to pick up the next group in back left corner
+    set_drive_voltage(-5)
+    time.wait(500, MSEC)
+    turn_to_point(-48,12)
+    drive_to(-48, 24)
+    #Pickup just pin
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for picking up just a pin.
+    claw(True) #Closes the claw to grab the pin, will need to be tuned
+    #knock over and move empty cup out of the way
+    set_drive_voltage(5)
+    time.wait(250, MSEC)
+    turn_to_angle(-180)
+    turn_to_angle(0)
+    #Score the pin in the left side goal
+    drive_to(-48, 48)
+    dropPin()
+    #Backup and turn to pick up the last group in the middle left corner
+    set_drive_voltage(-5)
+    time.wait(1000, MSEC)
+    turn_to_point(-24,48)
+    #Driving to pin group to pick it up
+    drive_to(-24,48)
+    grabGroup()
+    #Turning to score the last group
+    turn_to_point(-48,48)
+    set_drive_voltage(5)
+    time.wait(2000, MSEC)
+    #Driving to toggle
+    set_drive_voltage(-5)
+    time.wait(1000, MSEC)
+    drive_to(-72, 70)
     intake.stop(HOLD)
 
 
