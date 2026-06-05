@@ -481,13 +481,42 @@ def autonomous(preset):
 # Drives to matchload to grab pin, yellow up
     turn_to_point(-72,12)
     drive_to(-70,12)
-    grabPin()
+    grabPin(group)
 # Turns to next goal and drives to it
     turn_to_point(-48,48)
     drive_to(-50,46)
 # Scores and drives to next pin & cone
     dropPin()
-
+    turn_to_point(-72,48)
+    drive_to(-70,48)
+# Grabs the pin & cone and scores   
+    grabGroup()
+    turn_to_point(-70,48)
+    drive_to(-70,48) 
+    turn_to_point(-72,48)
+    scoreGroup(1)
+# Toggles!
+    turn_to_point(-72,65)
+    drive_to(-72,65)
+    toggle(2)
+# grabs pin & cup and scores it
+    turn_to_point(-72, 96)
+    grabPin(group)
+    turn_to_point(-48,96)
+    drive_to(-50,96)
+    dropPin()
+# grabs cup and pin and scoores it
+    turn_to_point(-50,130)
+    drive_to(-50,126)
+    grapPin(ground)
+    turn_to_point(-50,96)
+    drive_to(-50,96)
+    turn_to_point(-48,96)
+    dropPin()
+# grabs another group of pins & cups and scores
+    drive_to(-50, 126)
+    turn_to_point(-50,130)
+    
 
 
 
