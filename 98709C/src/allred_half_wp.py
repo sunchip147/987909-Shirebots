@@ -10,6 +10,7 @@
 
 # --- VEX V5 API ---
 # The vex module should be automatically available in a VEXcode V5 Python project.
+
 from vex import *
 import math
 import random
@@ -27,10 +28,13 @@ right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
 right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
 right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
 
-#Conveyor/scoring motors
-scorer = Motor(Ports.PORT9, GearSetting.RATIO_6_1, False)
-conveyor = Motor(Ports.PORT10, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
+#Intake/scoring motors
+lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
+claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
+intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+
+#toggle
+toggle_piston = DigitalOut(brain.three_wire_port.a)
 
 # Odometry Sensors
 inertial_sensor = Inertial(Ports.PORT18)
@@ -160,6 +164,24 @@ def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_
     turn_pid_runtime += 10
     return turn_output
 
+def lift_pid(lift_error, lift_integral_threshold=10, lift_settle_error=2):
+    global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
+
+    if abs(lift_error) < lift_integral_threshold:
+        accumulated_lift_error += lift_error
+    if lift_error * previous_lift_error < 0:
+        accumulated_lift_error = 0
+
+    lift_output = lift_kp * lift_error + lift_ki * accumulated_lift_error + lift_kd * (lift_error - previous_lift_error)
+    previous_lift_error = lift_error
+
+    if abs(lift_error) < lift_settle_error:
+        lift_settle_time_passed += 10
+    else:
+        lift_settle_time_passed = 0
+
+    lift_pid_runtime += 10
+    return lift_output
 # --- Drivetrain Control Functions ---
 def drive_hold():
     left_motor.stop(HOLD)
@@ -357,44 +379,111 @@ def turn_to_point(desired_x_position, desired_y_position, turn_max_voltage=6, tu
 
     drive_hold()
 
+def claw(state):
+    if state:
+        claw_motor.spin(FORWARD, 12, PERCENT)
+    else:
+        claw_motor.spin(REVERSE, 12, PERCENT)
+
+def toggle(toggle_count):
+    for _ in range(toggle_count):
+        toggle_piston.set(True)
+        time.sleep(0.5)
+        toggle_piston.set(False)
+        time.sleep(0.5)
+
+def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
+    global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
+
+    accumulated_lift_error = 0
+    previous_lift_error = 0
+    lift_settle_time_passed = 0
+    lift_pid_runtime = 0
+
+    while lift_settle_time_passed < lift_settle_time and lift_pid_runtime < lift_timeout:
+        lift_error = target_position - lift.position(DEGREES)
+        lift_output = lift_pid(lift_error)
+        lift_output = limit_input_min_and_max(lift_output, - lift_max_voltage, lift_max_voltage)
+        lift.spin(FORWARD, lift_output, VOLT)
+        time.sleep(0.01)
+
+    lift.stop(HOLD)
+
+def scoreGroup(groupNumber):
+    lift_to_position(90*groupNumber) #Placeholder values, will need to be tuned
+    claw(True)
+    time.sleep(0.5)
+    lift_to_position(0)
+
+def dropPin():
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for dropping just a pin into a goal.
+    time.sleep(0.5) 
+    claw(False) #Opens the claw to drop the pin, will need to be tuned to make sure it drops the pin without dropping the whole group.
+    time.sleep(0.5)
+
+def grabGroup():
+    time.sleep(0.5)
+    claw(True)
+    lift.spin(FORWARD, 12, PERCENT)
 """## Autonomous Code"""
 
 # --- Main Program ---
-def pre_autonomous():
+def pre_autonomous(): 
     brain.screen.clear_screen()
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
 def autonomous():
-    brain.screen.print("yolo")
-    
-    intake.spin(FORWARD,12,PERCENT)
-    turn_to_point(-24,24) 
+    intake.spin(FORWARD, 95, PERCENT)
+    #Turning to score preloads
+    turn_to_point(-24,24)
+    #Scoring the preload
     drive_to(-20, 20)
-    scorePin()
+    dropPin()
+    #Turning to pick up the next group
     turn_to_point(-24,0)
+    #Grabbing the wall group
     drive_to(-24, 4)
-    scoreGroup()
-    turn_to_point(-24,24)
-    drive_to(-24, 20)
-    scoreGroup(1)
-    drive_to(-20,20)
-    drive_to(-20,44)
-    turn_to_angle(135)
-    scoreGroup()    
-    drive_to(-20,28)
-    turn_to_point(-24,24)
-    scoreGroup(2)  
-    drive_to(-48,28)
-    turn_to_point(-48,24)
     grabGroup()
-    drive_to(-48,44)
-    turn_to_point(-48,48)
-    scorePin()
-    drive_to(-68,48)
-    turn_to_point(-66,48)
-    drive_to(-48,46)
+    #Turning to score the second group
+    turn_to_point(-24,24)
+    #Scoring the second group
+    set_drive_voltage(5)
+    time.wait(0.5, MSEC)
     scoreGroup(1)
+
+    #Turning to pick up the next group in back left corner
+    set_drive_voltage(-5)
+    time.wait(500, MSEC)
+    turn_to_point(-48,12)
+    drive_to(-48, 24)
+    #Pickup just pin
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for picking up just a pin.
+    claw(True) #Closes the claw to grab the pin, will need to be tuned
+    #knock over and move empty cup out of the way
+    set_drive_voltage(5)
+    time.wait(250, MSEC)
+    turn_to_angle(-180)
+    turn_to_angle(0)
+    #Score the pin in the left side goal
+    drive_to(-48, 48)
+    dropPin()
+    #Backup and turn to pick up the last group in the middle left corner
+    set_drive_voltage(-5)
+    time.wait(1000, MSEC)
+    turn_to_point(-24,48)
+    #Driving to pin group to pick it up
+    drive_to(-24,48)
+    grabGroup()
+    #Turning to score the last group
+    turn_to_point(-48,48)
+    set_drive_voltage(5)
+    time.wait(2000, MSEC)
+    #Driving to toggle
+    set_drive_voltage(-5)
+    time.wait(1000, MSEC)
+    drive_to(-72, 70)
+    intake.stop(HOLD)
 
 
 """### User Control"""
