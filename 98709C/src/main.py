@@ -27,7 +27,7 @@ right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
 right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
 right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
 
-#Intake/scoring motors
+#Intake/scoring motors 
 lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
 claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
 intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
@@ -439,32 +439,9 @@ def pre_autonomous():
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
-def autonomous(preset):
+def autonomous():
     brain.screen.print("yolo")
     
-    if preset == "test":
-        drive_to(5,7)
-        drive_to(24, 0)
-        turn_to_angle(90)
-        drive_to(24, 24)
-        turn_to_point(0, 24)
-    elif preset == "topToggleLeft":
-        toggle(2)
-        turn_to_point(-23,72)
-        dropPin()
-        grabGroup()
-        drive_to(-22, 71)
-        turn_to_point (-24,48)
-        drive_to (-22,49)
-        scoreGroup(1)
-        turn_to_point (-24,72)
-        drive_to (-22,70)
-        grabGroup()
-        turn_to_point (-24,48)
-        drive_to (-22,49)
-        scoreGroup(2)
-    
-        
 """### User Control"""
 
 def user_control():
