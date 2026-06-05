@@ -27,10 +27,13 @@ right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
 right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
 right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
 
-#Conveyor/scoring motors
-scorer = Motor(Ports.PORT9, GearSetting.RATIO_6_1, False)
-conveyor = Motor(Ports.PORT10, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
+#Intake/scoring motors
+lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
+claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
+intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+
+#toggle
+toggle_piston = DigitalOut(brain.three_wire_port.a)
 
 # Odometry Sensors
 inertial_sensor = Inertial(Ports.PORT18)
@@ -159,6 +162,30 @@ def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_
 
     turn_pid_runtime += 10
     return turn_output
+
+#lift PID Constants
+lift_kp = 0.5
+lift_ki = 0.002
+lift_kd = 1
+
+def lift_pid(lift_error, lift_integral_threshold=10, lift_settle_error=2):
+    global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
+
+    if abs(lift_error) < lift_integral_threshold:
+        accumulated_lift_error += lift_error
+    if lift_error * previous_lift_error < 0:
+        accumulated_lift_error = 0
+
+    lift_output = lift_kp * lift_error + lift_ki * accumulated_lift_error + lift_kd * (lift_error - previous_lift_error)
+    previous_lift_error = lift_error
+
+    if abs(lift_error) < lift_settle_error:
+        lift_settle_time_passed += 10
+    else:
+        lift_settle_time_passed = 0
+
+    lift_pid_runtime += 10
+    return lift_output
 
 # --- Drivetrain Control Functions ---
 def drive_hold():
@@ -357,6 +384,53 @@ def turn_to_point(desired_x_position, desired_y_position, turn_max_voltage=6, tu
 
     drive_hold()
 
+def claw(state):
+    if state:
+        claw_motor.spin(FORWARD, 12, PERCENT)
+    else:
+        claw_motor.spin(REVERSE, 12, PERCENT)
+
+def toggle(toggle_count):
+    for _ in range(toggle_count):
+        toggle_piston.set(True)
+        time.sleep(0.5)
+        toggle_piston.set(False)
+        time.sleep(0.5)
+
+def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
+    global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
+
+    accumulated_lift_error = 0
+    previous_lift_error = 0
+    lift_settle_time_passed = 0
+    lift_pid_runtime = 0
+
+    while lift_settle_time_passed < lift_settle_time and lift_pid_runtime < lift_timeout:
+        lift_error = target_position - lift.position(DEGREES)
+        lift_output = lift_pid(lift_error)
+        lift_output = limit_input_min_and_max(lift_output, - lift_max_voltage, lift_max_voltage)
+        lift.spin(FORWARD, lift_output, VOLT)
+        time.sleep(0.01)
+
+    lift.stop(HOLD)
+
+def scoreGroup(groupNumber):
+    lift_to_position(90*groupNumber) #Placeholder values, will need to be tuned
+    claw(True)
+    time.sleep(0.5)
+    lift_to_position(0)
+
+def dropPin():
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for dropping just a pin into a goal.
+    time.sleep(0.5) 
+    claw(False) #Opens the claw to drop the pin, will need to be tuned to make sure it drops the pin without dropping the whole group.
+    time.sleep(0.5)
+
+def grabGroup():
+    time.sleep(0.5)
+    claw(True)
+    lift.spin(FORWARD, 12, PERCENT)
+
 """## Autonomous Code"""
 
 # --- Main Program ---
@@ -365,38 +439,60 @@ def pre_autonomous():
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
-def autonomous():
+def autonomous(preset):
     brain.screen.print("yolo")
     
-    intake.spin(FORWARD,12,PERCENT)
-    turn_to_point(-24,24) 
-    drive_to(-20, 20)
-    scorePin()
-    turn_to_point(-24,0)
-    drive_to(-24, 4)
-    scoreGroup()
-    turn_to_point(-24,24)
-    drive_to(-24, 20)
-    scoreGroup(1)
+    intake.spin(FORWARD,95,PERCENT)
+# Toggles bottom toggle to red   
+    toggle(2)
+# Drives to red goal and deposits yellow preload
+    turn_to_point(-24, 24)
     drive_to(-20,20)
-    drive_to(-20,44)
-    turn_to_angle(135)
-    scoreGroup()    
-    drive_to(-20,28)
-    turn_to_point(-24,24)
-    scoreGroup(2)  
-    drive_to(-48,28)
+    dropPin()
+# Drives to yellow pin & cone  and picks it up
+    turn_to_point(-24,0)
+    drive_to(-20, 4)
+    grabGroup()
+# Scores yellow pin and cone
+    turn_to_point(-20, 20)
+    drive_to(-20,20)
+    turn_to_point(-24, 24)
+    scoreGroup(1)
+# Drives to other yellow pin & cone and grabs it
+    turn_to_point(-44,22)
+    drive_to(-44,22)
     turn_to_point(-48,24)
     grabGroup()
-    drive_to(-48,44)
+# Turns back to goal, drives to it, then scores
+    turn_to_point(-28,20)
+    drive_to(-28,20)
+    turn_to_point(-24,24)
+    scoreGroup(2)
+# Moves to last yellow pin & cone and grabs it
+    turn_to_point(-28,48)
+    drive_to(-28,44)
+    turn_to_point(-24,48)
+    grabGroup()
+# Drives to goal and scores pin & cone set
+    turn_to_point(-24,24)
+    drive_to(-26,26)
+    turn_to_point(24,-24)
+    scoreGroup(3)
+# Drives to matchload to grab pin, yellow up
+    turn_to_point(-72,12)
+    drive_to(-70,12)
+    grabPin()
+# Turns to next goal and drives to it
     turn_to_point(-48,48)
-    scorePin()
-    drive_to(-68,48)
-    turn_to_point(-66,48)
-    drive_to(-48,46)
-    scoreGroup(1)
+    drive_to(-50,46)
+# Scores and drives to next pin & cone
+    dropPin()
 
 
+
+
+
+        
 """### User Control"""
 
 def user_control():
