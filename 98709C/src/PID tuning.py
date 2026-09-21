@@ -20,25 +20,25 @@ brain = Brain()
 controller = Controller(PRIMARY)
 
 # Drivetrain Motors
-left_motor = Motor(Ports.PORT18, GearSetting.RATIO_6_1, True)
-left_motor_2 = Motor(Ports.PORT19, GearSetting.RATIO_6_1, True)
-left_motor_3 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, True)
-right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
+left_motor = Motor(Ports.PORT11, GearSetting.RATIO_6_1, True)
+left_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, True)
+left_motor_3 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, True)
+right_motor = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
 right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
-right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
+right_motor_3 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
 
 #Intake/scoring motors 
-lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
-claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False)
+claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, False)
+intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False)
 
-#toggle
-toggle_piston = DigitalOut(brain.three_wire_port.a)
+#claw piston
+claw_piston = DigitalOut(brain.three_wire_port.h)
 
 # Odometry Sensors
 inertial_sensor = Inertial(Ports.PORT18)
 forward_tracker = Rotation(Ports.PORT5, False)
-sideways_tracker = Rotation(Ports.PORT17, False)
+sideways_tracker = Rotation(Ports.PORT17, False) #REMOVE THIS 
 
 # --- Constants ---
 PI = 3.14159265359
@@ -386,16 +386,9 @@ def turn_to_point(desired_x_position, desired_y_position, turn_max_voltage=6, tu
 
 def claw(state):
     if state:
-        claw_motor.spin(FORWARD, 12, PERCENT)
+        claw_piston.set(True)
     else:
-        claw_motor.spin(REVERSE, 12, PERCENT)
-
-def toggle(toggle_count):
-    for _ in range(toggle_count):
-        toggle_piston.set(True)
-        time.sleep(0.5)
-        toggle_piston.set(False)
-        time.sleep(0.5)
+        claw_piston.set(False)
 
 def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
     global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
@@ -429,7 +422,7 @@ def dropPin():
 def grabGroup():
     time.sleep(0.5)
     claw(True)
-    lift.spin(FORWARD, 12, PERCENT)
+    lift.spin(FORWARD, 95, PERCENT)
 
 """## Autonomous Code"""
 
@@ -454,8 +447,40 @@ def user_control():
     set_position(0, 0, 0)
 
     while True:
-        drive_forward = cubic(controller.axis3.position(PERCENT))
-        drive_turn = 0.6 * cubic(controller.axis1.position(PERCENT))
+
+        #Lift control
+        if controller.buttonA.pressing():
+            lift.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonB.pressing():
+            lift.spin(REVERSE, 95, PERCENT)
+        else:
+            lift.stop(HOLD)
+
+        #Control the claw piston
+        if controller.buttonLeft.pressing():
+            claw_piston.set(True)
+        elif controller.buttonRight.pressing():
+            claw_piston.set(False)
+
+        #Control the intake
+        if controller.buttonL1.pressing():
+            intake.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonL2.pressing():
+            intake.spin(REVERSE, 95, PERCENT)
+        else:
+            intake.stop(HOLD)
+
+        #Control the claw wrist
+        if controller.buttonY.pressing():
+            claw_wrist.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonX.pressing():
+            claw_wrist.spin(REVERSE, 95, PERCENT)
+        else:
+            claw_wrist.stop(HOLD)
+
+        #Drive Controls
+        drive_forward = cubic(controller.axis3.position())
+        drive_turn = 0.6 * cubic(controller.axis1.position())
 
         left_speed = 0.75 * (drive_forward + drive_turn)
         right_speed = 0.75 * (drive_forward - drive_turn)
