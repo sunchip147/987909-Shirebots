@@ -111,8 +111,8 @@ drive_pid_runtime = 0
 
 # Drive PID Constants
 drive_kp = 0.75
-drive_ki = 0.002
-drive_kd = 2
+drive_ki = 0
+drive_kd = 0
 
 def drive_pid(drive_error, custom_drive_kp=drive_kp, custom_drive_ki=drive_ki, custom_drive_kd=drive_kd, drive_integral_threshold=10, drive_settle_error=2):
     global accumulated_drive_error, previous_drive_error, drive_settle_time_passed, drive_pid_runtime
@@ -140,9 +140,9 @@ turn_settle_time_passed = 0
 turn_pid_runtime = 0
 
 # Turn PID Constants
-turn_kp = 0.1
-turn_ki = 0.0001
-turn_kd = 0.65
+turn_kp = 0
+turn_ki = 0
+turn_kd = 0
 
 def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_turn_kd=turn_kd, turn_integral_threshold=15, turn_settle_error=2):
     global accumulated_turn_error, previous_turn_error, turn_settle_time_passed, turn_pid_runtime
@@ -441,9 +441,11 @@ def pre_autonomous():
 
 def autonomous():
     set_position(0, 0, 0)
-    set_drive_voltage(5)
-    wait(1000, MSEC)
-    
+    if input("Enter autonomous mode (1 or 2): ") == "1":
+        drive_to(24, 0)  # Drive forward 24 inches
+    elif input("Enter autonomous mode (1 or 2): ") == "2":
+        turn_to_angle(90)  # Turn to face 90 degrees
+
 """### User Control"""
 
 def user_control():
