@@ -20,17 +20,17 @@ brain = Brain()
 controller = Controller(PRIMARY)
 
 # Drivetrain Motors
-left_motor = Motor(Ports.PORT18, GearSetting.RATIO_6_1, True)
-left_motor_2 = Motor(Ports.PORT19, GearSetting.RATIO_6_1, True)
-left_motor_3 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, True)
-right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
-right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
-right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
+left_motor = Motor(Ports.PORT2, GearSetting.RATIO_6_1, True)
+left_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, True)
+left_motor_3 = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True)
+right_motor = Motor(Ports.PORT12, GearSetting.RATIO_6_1, False)
+right_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, False)
+right_motor_3 = Motor(Ports.PORT11, GearSetting.RATIO_6_1, False)
 
-#Intake/scoring motors
+#Intake/scoring motors 
 lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
-claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+claw_motor = Motor(Ports.PORT, GearSetting.RATIO_6_1, False)
+intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False)
 
 #toggle
 toggle_piston = DigitalOut(brain.three_wire_port.a)
@@ -425,7 +425,7 @@ def dropPin():
     time.sleep(0.5) 
     claw(False) #Opens the claw to drop the pin, will need to be tuned to make sure it drops the pin without dropping the whole group.
     time.sleep(0.5)
-  
+
 def grabGroup():
     time.sleep(0.5)
     claw(True)
@@ -439,234 +439,9 @@ def pre_autonomous():
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
-def autonomous(preset):
+def autonomous():
     brain.screen.print("yolo")
-    set_position(0,5)
-    intake.spin(FORWARD,95,PERCENT)
-# Toggles bottom toggle to red   
-    toggle(2)
-# Drives to bottom red goal and deposits yellow preload
-    turn_to_point(-24, 24)
-    drive_to(-20,20)
-    dropPin()
-# Drives to bottom yellow pin & cone and picks it up
-    turn_to_point(-24,0)
-    drive_to(-20, 4)
-    grabGroup()
-# Scores yellow pin and cone
-    turn_to_point(-20, 20)
-    drive_to(-20,20)
-    turn_to_point(-24, 24)
-    scoreGroup(1)
-# Drives to left yellow pin & cone and grabs it
-    turn_to_point(-44,22)
-    drive_to(-44,22)
-    turn_to_point(-48,24)
-    grabGroup()
-# Turns back to goal, drives to it, then scores
-    turn_to_point(-28,20)
-    drive_to(-28,20)
-    turn_to_point(-24,24)
-    scoreGroup(2)
-# Moves to top yellow pin & cone and grabs it
-    turn_to_point(-28,48)
-    drive_to(-28,44)
-    turn_to_point(-24,48)
-    grabGroup()
-# Drives to goal and scores pin & cone set
-    turn_to_point(-24,24)
-    drive_to(-26,26)
-    turn_to_point(24,-24)
-    scoreGroup(3)
-# Drives to matchload to grab pin, yellow up
-    #matchload
-    turn_to_point(-72,12)
-    drive_to(-70,12)
-    grabGroup
-# Turns to top red goal and drives to it
-    turn_to_point(-48,48)
-    drive_to(-50,46)
-# Scores and drives to bottom left pin & cone
-    dropPin()
-    turn_to_point(-72,48)
-    drive_to(-70,48)
-# Grabs the bottom left pin & cone and scores   
-    grabGroup()
-    turn_to_point(-70,48)
-    drive_to(-70,48) 
-    turn_to_point(-72,48)
-    scoreGroup(1)
-# Toggles!
-    turn_to_point(-72,65)
-    drive_to(-72,65)
-    toggle(2)
-# grabs top left pin & cup and scores it
-    turn_to_point(-72, 96)
-    # pin out of top of the cup
-    grabGroup(0)
-    turn_to_point(-48,96)
-    drive_to(-50,96)
-    dropPin()
-# grabs a cup then a top left plus pin and scores it
-    turn_to_point(-50,130)
-    drive_to(-50,126)
-    turn_to_point(-50, 120)
-    drive_to(-50,130)
-    turn_to_point(-50,96)
-    drive_to(-50,96)
-    turn_to_point(-48,96)
-    scoreGroup(1)
-# grabs pin & cup from right plus and scores
-    drive_to(-50, 126)
-    turn_to_point(-58,130)
-    drive_to(-48,130)
-    turn_to_point(-48,96)
-    drive_to()
-    scoreGroup(2)
-# grabs pin & cone to the right of the goal.
-    drive_to(-26,100)
-    turn_to_point(-26,120)
-    drive_to(-26,96)
-    turn_to_point(-48,96) 
-    drive_to(-24,96)
-    drive_to(-44,96)
-    scoreGroup(3)
-# crosses to blue and grabs the top pin and scores
-    turn_to_point(-24,100) 
-    drive_to(-22,100)
-    turn_to_angle(180)
-    drive_to(-24,100)
-    turn_to_point(-24,130)
-    drive_to(-22,130)
-    dropPin()
-# goes around the goal and grabs pin then a cone on wall
-    drive_to(-36,130)
-    drive_to(-24,150)
-    grabGroup()
-    turn_to_point(-24,130)
-    drive_to(-20,134)
-    turn_to_point(-24,130)
-    scoreGroup(1)
-# grabs cone then last pin from plus and scores
-    turn_to_point(-23,144)
-    drive_to(-23,142)
-    grabGroup()
-    turn_to_point(-16, 96)
-    drive_to(-16, 96)
-    turn_to_point(-20,96)
-    turn_to_point()
-    drive_to(-20,96)
-    turn_to_point(-24,130)
-    drive_to(-22,130)
-    scoreGroup()
-# Toggles!
-    turn_to_point(0,144)
-    drive_to(0, 139)
-    toggle(2)
-# Grab center pin and score in blue goal
-    turn_to_point(0, 96)
-    drive_to(0, 100)
-    grabGroup()
-    turn_to_point(24,120)
-    drive_to(22,120)
-    scoreGroup(1)
-# Drive up and grab pin group to score
-    turn_to_point(24,144)
-    drive_to(22,140)
-    grabGroup()
-    turn_to_point(24,120)
-    drive_to(22,116)
-    scoreGroup(2)
-# Drive down and grab pin group to score
-    turn_to_point(24,96)
-    drive_to(22,96)
-    grabGroup()
-    turn_to_point(24,120)
-    drive_to(22,96)
-    scoreGroup(2)
-# Drive right and grab pin group to score
-    drive_to(28,116)
-    turn_to_point(48,120)
-    drive_to(46,116)
-    grabGroup()
-    turn_to_point(24, 120)
-    drive_to (26, 116)
-    scoreGroup(3)
-# Drive to top right toggle and grab match load
-    turn_to_point(72,134)
-    drive_to(72,134)
-    grabGroup
-# Drive to blue goal and score pin
-    turn_to_point(48,96)
-    drive_to(48,96)
-    scoreGroup(0)
-# Drive to wall to grab group then score
-    turn_to_point(72,96)
-    drive_to(72,96)
-    grabGroup
-    turn_to_point(48,96)
-    drive_to(48,96)
-    scoreGroup
-# Toggles!
-    turn_to_point(72,72)
-    drive_to(70,70)
-    toggle(2)
-# Drive to right plus pin to pick it up and score
-    turn_to_point(48,24)
-    drive_to(48,28)
-    grabGroup
-    turn_to_point(48,48)
-    drive_to(44,44)
-    scoreGroup(0)
-# Grab pin group off wall and score
-    turn_to_point(72,48)
-    drive_to(72,48)
-    grabGroup
-    turn_to_point(48,48)
-    drive_to(48,44)
-    scoreGroup(1)
-# Grab remaining cup off wall and grab top plus pin
-    turn_to_point(72,50)
-    drive_to(72,48)
-    grabGroup
-    turn_to_point(24,48)
-    drive_to(24,50)
-    grabGroup
-    turn_to_point(48,48)
-    drive_to(48,46)
-    scoreGroup(2)
-# Grab right blue off top plus and score
-    turn_to_point(24,48)
-    drive_to(28,48)
-    grabGroup
-    turn_to_point(24,24)
-    drive_to(24,28)
-    scoreGroup(0)
-# Grab bottom red group and score
-    turn_to_point(24,48)
-    drive_to(24,44)
-    grabGroup
-    turn_to_point(24,24)
-    drive_to(24,28)
-    scoreGroup(1)
-# Grab group by the wall and score
-    turn_to_point(24,0)
-    drive_to(24,4)
-    grabGroup
-    turn_to_point(24,24)
-    drive_to(24,20)
-    scoreGroup(2)
-# DONE
-    intake.stop(HOLD)
     
-
-
-
-
-
-
-
-        
 """### User Control"""
 
 def user_control():
@@ -695,3 +470,10 @@ def user_control():
 # Competition setup
 competition = Competition(user_control, autonomous)
 pre_autonomous()
+
+def test_motors()
+    set_drive_voltage(6)
+    time.wait(200,MSEC)
+    drive_brake()
+
+test_motors()
