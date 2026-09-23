@@ -20,17 +20,17 @@ brain = Brain()
 controller = Controller(PRIMARY)
 
 # Drivetrain Motors
-left_motor = Motor(Ports.PORT11, GearSetting.RATIO_6_1, True)
-left_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, True)
-left_motor_3 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, True)
-right_motor = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
-right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
-right_motor_3 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, False)
+left_motor = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True) #1
+left_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, True) #6
+left_motor_3 = Motor(Ports.PORT20, GearSetting.RATIO_6_1, True) #20
+right_motor = Motor(Ports.PORT11, GearSetting.RATIO_6_1, False) #11
+right_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, False)
+right_motor_3 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, False) #12
 
 #Intake/scoring motors 
-lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False)
-claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False)
+lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False) #13
+claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, False) #4
+intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False) #3
 
 #claw piston
 claw_piston = DigitalOut(brain.three_wire_port.h)
