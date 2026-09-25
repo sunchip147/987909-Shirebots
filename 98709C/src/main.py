@@ -20,25 +20,25 @@ brain = Brain()
 controller = Controller(PRIMARY)
 
 # Drivetrain Motors
-left_motor = Motor(Ports.PORT18, GearSetting.RATIO_6_1, True)
-left_motor_2 = Motor(Ports.PORT19, GearSetting.RATIO_6_1, True)
-left_motor_3 = Motor(Ports.PORT2, GearSetting.RATIO_6_1, True)
-right_motor = Motor(Ports.PORT8, GearSetting.RATIO_6_1, False)
-right_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, False)
-right_motor_3 = Motor(Ports.PORT21, GearSetting.RATIO_6_1, False)
+left_motor = Motor(Ports.PORT1, GearSetting.RATIO_6_1, True) #1
+left_motor_2 = Motor(Ports.PORT6, GearSetting.RATIO_6_1, True) #6
+left_motor_3 = Motor(Ports.PORT20, GearSetting.RATIO_6_1, True) #20
+right_motor = Motor(Ports.PORT11, GearSetting.RATIO_6_1, False) #11
+right_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, False)
+right_motor_3 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, False) #12
 
 #Intake/scoring motors 
-lift = Motor(Ports.PORT20, GearSetting.RATIO_6_1, False)
-claw_motor = Motor(Ports.PORT7, GearSetting.RATIO_6_1, False)
-intake = Motor(Ports.PORT1, GearSetting.RATIO_6_1, False)
+lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False) #13
+claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, False) #4
+intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False) #3
 
-#toggle
-toggle_piston = DigitalOut(brain.three_wire_port.a)
+#claw piston
+claw_piston = DigitalOut(brain.three_wire_port.h)
 
 # Odometry Sensors
 inertial_sensor = Inertial(Ports.PORT18)
 forward_tracker = Rotation(Ports.PORT5, False)
-sideways_tracker = Rotation(Ports.PORT17, False)
+sideways_tracker = Rotation(Ports.PORT17, False) #REMOVE THIS 
 
 # --- Constants ---
 PI = 3.14159265359
@@ -111,8 +111,8 @@ drive_pid_runtime = 0
 
 # Drive PID Constants
 drive_kp = 0.75
-drive_ki = 0.002
-drive_kd = 2
+drive_ki = 0
+drive_kd = 0
 
 def drive_pid(drive_error, custom_drive_kp=drive_kp, custom_drive_ki=drive_ki, custom_drive_kd=drive_kd, drive_integral_threshold=10, drive_settle_error=2):
     global accumulated_drive_error, previous_drive_error, drive_settle_time_passed, drive_pid_runtime
@@ -140,9 +140,9 @@ turn_settle_time_passed = 0
 turn_pid_runtime = 0
 
 # Turn PID Constants
-turn_kp = 0.1
-turn_ki = 0.0001
-turn_kd = 0.65
+turn_kp = 0
+turn_ki = 0
+turn_kd = 0
 
 def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_turn_kd=turn_kd, turn_integral_threshold=15, turn_settle_error=2):
     global accumulated_turn_error, previous_turn_error, turn_settle_time_passed, turn_pid_runtime
@@ -386,16 +386,9 @@ def turn_to_point(desired_x_position, desired_y_position, turn_max_voltage=6, tu
 
 def claw(state):
     if state:
-        claw_motor.spin(FORWARD, 12, PERCENT)
+        claw_piston.set(True)
     else:
-        claw_motor.spin(REVERSE, 12, PERCENT)
-
-def toggle(toggle_count):
-    for _ in range(toggle_count):
-        toggle_piston.set(True)
-        time.sleep(0.5)
-        toggle_piston.set(False)
-        time.sleep(0.5)
+        claw_piston.set(False)
 
 def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
     global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
@@ -429,10 +422,306 @@ def dropPin():
 def grabGroup():
     time.sleep(0.5)
     claw(True)
-    lift.spin(FORWARD, 12, PERCENT)
+    lift.spin(FORWARD, 95, PERCENT)
+
+"""## Auton Routes"""
+def all_red_half_wp():
+    intake.spin(FORWARD, 95, PERCENT)
+    #Turning to score preloads
+    turn_to_point(-24,24)
+    #Scoring the preload
+    drive_to(-20, 20)
+    dropPin()
+    #Turning to pick up the next group
+    turn_to_point(-24,0)
+    #Grabbing the wall group
+    drive_to(-24, 4)
+    grabGroup()
+    #Turning to score the second group
+    turn_to_point(-24,24)
+    #Scoring the second group
+    set_drive_voltage(5)
+    time.sleep(0.5, MSEC)
+    scoreGroup(1)
+    #Turning to pick up the next group in back left corner
+    set_drive_voltage(-5)
+    time.sleep(0.5, MSEC)
+    turn_to_point(-48,12)
+    drive_to(-48, 24)
+    #Pickup just pin
+    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for picking up just a pin.
+    claw(True) #Closes the claw to grab the pin, will need to be tuned
+    #knock over and move empty cup out of the way
+    set_drive_voltage(5)
+    time.sleep(0.25, MSEC)
+    turn_to_angle(-180)
+    turn_to_angle(0)
+    #Score the pin in the left side goal
+    drive_to(-48, 48)
+    dropPin()
+    #Backup and turn to pick up the last group in the middle left corner
+    set_drive_voltage(-5)
+    time.sleep(1, MSEC)
+    turn_to_point(-24,48)
+    #Driving to pin group to pick it up
+    drive_to(-24,48)
+    grabGroup()
+    #Turning to score the last group
+    turn_to_point(-48,48)
+    set_drive_voltage(5)
+    time.sleep(2, MSEC)
+    #Driving to toggle
+    set_drive_voltage(-5)
+    time.sleep(1, MSEC)
+    drive_to(-72, 70)
+    intake.stop(HOLD)
+
+"""Red Right Route"""
+def red_right():
+    #Quick right score
+    #toggle(2)
+    turn_to_point(-23,72)
+    dropPin()
+    grabGroup()
+    drive_to(-22, 71)
+    turn_to_point (-24,48)
+    drive_to (-22,49)
+    scoreGroup(1)
+    turn_to_point (-24,72)
+    drive_to (-22,70)
+    grabGroup()
+    turn_to_point (-24,48)
+    drive_to (-22,49)
+    scoreGroup(2)
+
+"""Skills Route V1"""
+def skills_route_v1():
+    brain.screen.print("yolo")
+    set_position(0,5)
+    intake.spin(FORWARD,95,PERCENT)
+# Toggles bottom toggle to red   
+    #toggle(2)
+# Drives to bottom red goal and deposits yellow preload
+    turn_to_point(-24, 24)
+    drive_to(-20,20)
+    dropPin()
+# Drives to bottom yellow pin & cone and picks it up
+    turn_to_point(-24,0)
+    drive_to(-20, 4)
+    grabGroup()
+# Scores yellow pin and cone
+    turn_to_point(-20, 20)
+    drive_to(-20,20)
+    turn_to_point(-24, 24)
+    scoreGroup(1)
+# Drives to left yellow pin & cone and grabs it
+    turn_to_point(-44,22)
+    drive_to(-44,22)
+    turn_to_point(-48,24)
+    grabGroup()
+# Turns back to goal, drives to it, then scores
+    turn_to_point(-28,20)
+    drive_to(-28,20)
+    turn_to_point(-24,24)
+    scoreGroup(2)
+# Moves to top yellow pin & cone and grabs it
+    turn_to_point(-28,48)
+    drive_to(-28,44)
+    turn_to_point(-24,48)
+    grabGroup()
+# Drives to goal and scores pin & cone set
+    turn_to_point(-24,24)
+    drive_to(-26,26)
+    turn_to_point(24,-24)
+    scoreGroup(3)
+# Drives to matchload to grab pin, yellow up
+    #matchload
+    turn_to_point(-72,12)
+    drive_to(-70,12)
+    grabGroup
+# Turns to top red goal and drives to it
+    turn_to_point(-48,48)
+    drive_to(-50,46)
+# Scores and drives to bottom left pin & cone
+    dropPin()
+    turn_to_point(-72,48)
+    drive_to(-70,48)
+# Grabs the bottom left pin & cone and scores   
+    grabGroup()
+    turn_to_point(-70,48)
+    drive_to(-70,48) 
+    turn_to_point(-72,48)
+    scoreGroup(1)
+# Toggles!
+    turn_to_point(-72,65)
+    drive_to(-72,65)
+    #toggle(2)
+# grabs top left pin & cup and scores it
+    turn_to_point(-72, 96)
+    # pin out of top of the cup
+    grabGroup(0)
+    turn_to_point(-48,96)
+    drive_to(-50,96)
+    dropPin()
+# grabs a cup then a top left plus pin and scores it
+    turn_to_point(-50,130)
+    drive_to(-50,126)
+    turn_to_point(-50, 120)
+    drive_to(-50,130)
+    turn_to_point(-50,96)
+    drive_to(-50,96)
+    turn_to_point(-48,96)
+    scoreGroup(1)
+# grabs pin & cup from right plus and scores
+    drive_to(-50, 126)
+    turn_to_point(-58,130)
+    drive_to(-48,130)
+    turn_to_point(-48,96)
+    drive_to()
+    scoreGroup(2)
+# grabs pin & cone to the right of the goal.
+    drive_to(-26,100)
+    turn_to_point(-26,120)
+    drive_to(-26,96)
+    turn_to_point(-48,96) 
+    drive_to(-24,96)
+    drive_to(-44,96)
+    scoreGroup(3)
+# crosses to blue and grabs the top pin and scores
+    turn_to_point(-24,100) 
+    drive_to(-22,100)
+    turn_to_angle(180)
+    drive_to(-24,100)
+    turn_to_point(-24,130)
+    drive_to(-22,130)
+    dropPin()
+# goes around the goal and grabs pin then a cone on wall
+    drive_to(-36,130)
+    drive_to(-24,150)
+    grabGroup()
+    turn_to_point(-24,130)
+    drive_to(-20,134)
+    turn_to_point(-24,130)
+    scoreGroup(1)
+# grabs cone then last pin from plus and scores
+    turn_to_point(-23,144)
+    drive_to(-23,142)
+    grabGroup()
+    turn_to_point(-16, 96)
+    drive_to(-16, 96)
+    turn_to_point(-20,96)
+    turn_to_point()
+    drive_to(-20,96)
+    turn_to_point(-24,130)
+    drive_to(-22,130)
+    scoreGroup()
+# Toggles!
+    turn_to_point(0,144)
+    drive_to(0, 139)
+    #toggle(2)
+# Grab center pin and score in blue goal
+    turn_to_point(0, 96)
+    drive_to(0, 100)
+    grabGroup()
+    turn_to_point(24,120)
+    drive_to(22,120)
+    scoreGroup(1)
+# Drive up and grab pin group to score
+    turn_to_point(24,144)
+    drive_to(22,140)
+    grabGroup()
+    turn_to_point(24,120)
+    drive_to(22,116)
+    scoreGroup(2)
+# Drive down and grab pin group to score
+    turn_to_point(24,96)
+    drive_to(22,96)
+    grabGroup()
+    turn_to_point(24,120)
+    drive_to(22,96)
+    scoreGroup(2)
+# Drive right and grab pin group to score
+    drive_to(28,116)
+    turn_to_point(48,120)
+    drive_to(46,116)
+    grabGroup()
+    turn_to_point(24, 120)
+    drive_to (26, 116)
+    scoreGroup(3)
+# Drive to top right toggle and grab match load
+    turn_to_point(72,134)
+    drive_to(72,134)
+    grabGroup
+# Drive to blue goal and score pin
+    turn_to_point(48,96)
+    drive_to(48,96)
+    scoreGroup(0)
+# Drive to wall to grab group then score
+    turn_to_point(72,96)
+    drive_to(72,96)
+    grabGroup
+    turn_to_point(48,96)
+    drive_to(48,96)
+    scoreGroup
+# Toggles!
+    turn_to_point(72,72)
+    drive_to(70,70)
+    #toggle(2)
+# Drive to right plus pin to pick it up and score
+    turn_to_point(48,24)
+    drive_to(48,28)
+    grabGroup
+    turn_to_point(48,48)
+    drive_to(44,44)
+    scoreGroup(0)
+# Grab pin group off wall and score
+    turn_to_point(72,48)
+    drive_to(72,48)
+    grabGroup
+    turn_to_point(48,48)
+    drive_to(48,44)
+    scoreGroup(1)
+# Grab remaining cup off wall and grab top plus pin
+    turn_to_point(72,50)
+    drive_to(72,48)
+    grabGroup
+    turn_to_point(24,48)
+    drive_to(24,50)
+    grabGroup
+    turn_to_point(48,48)
+    drive_to(48,46)
+    scoreGroup(2)
+# Grab right blue off top plus and score
+    turn_to_point(24,48)
+    drive_to(28,48)
+    grabGroup
+    turn_to_point(24,24)
+    drive_to(24,28)
+    scoreGroup(0)
+# Grab bottom red group and score
+    turn_to_point(24,48)
+    drive_to(24,44)
+    grabGroup
+    turn_to_point(24,24)
+    drive_to(24,28)
+    scoreGroup(1)
+# Grab group by the wall and score
+    turn_to_point(24,0)
+    drive_to(24,4)
+    grabGroup
+    turn_to_point(24,24)
+    drive_to(24,20)
+    scoreGroup(2)
+# DONE
+    intake.stop(HOLD)
+
+"""5in Code"""
+def five_in():
+    set_position(0, 0, 0)
+    set_drive_voltage(5)
+    wait(1000, MSEC)
 
 """## Autonomous Code"""
-
 # --- Main Program ---
 def pre_autonomous():
     brain.screen.clear_screen()
@@ -440,8 +729,9 @@ def pre_autonomous():
     inertial_sensor.calibrate()
 
 def autonomous():
-    brain.screen.print("yolo")
-    
+    set_position(0, 0, 0)
+    test.claw(True)
+
 """### User Control"""
 
 def user_control():
@@ -450,8 +740,40 @@ def user_control():
     set_position(0, 0, 0)
 
     while True:
-        drive_forward = cubic(controller.axis3.position(PERCENT))
-        drive_turn = 0.6 * cubic(controller.axis1.position(PERCENT))
+
+        #Lift control
+        if controller.buttonA.pressing():
+            lift.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonB.pressing():
+            lift.spin(REVERSE, 95, PERCENT)
+        else:
+            lift.stop(HOLD)
+
+        #Control the claw piston
+        if controller.buttonLeft.pressing():
+            claw_piston.set(True)
+        elif controller.buttonRight.pressing():
+            claw_piston.set(False)
+
+        #Control the intake
+        if controller.buttonL1.pressing():
+            intake.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonL2.pressing():
+            intake.spin(REVERSE, 95, PERCENT)
+        else:
+            intake.stop(HOLD)
+
+        #Control the claw wrist
+        if controller.buttonY.pressing():
+            claw_wrist.spin(FORWARD, 95, PERCENT)
+        elif controller.buttonX.pressing():
+            claw_wrist.spin(REVERSE, 95, PERCENT)
+        else:
+            claw_wrist.stop(HOLD)
+
+        #Drive Controls
+        drive_forward = cubic(controller.axis3.position())
+        drive_turn = 0.6 * cubic(controller.axis1.position())
 
         left_speed = 0.75 * (drive_forward + drive_turn)
         right_speed = 0.75 * (drive_forward - drive_turn)

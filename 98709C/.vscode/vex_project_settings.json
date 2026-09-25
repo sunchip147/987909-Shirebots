@@ -4,15 +4,18 @@
 		"json": 2
 	},
 	"project": {
-		"name": "98709L-Lorum-Ipsum",
-		"description": "Template project for VEX Robotics Competition teams using Python",
+		"name": "98709C VEX",
+		"description": "Template and functions for Vex Shirebots 98709C",
 		"creationDate": "4/15/2026, 5:50:01 PM",
 		"platform": "V5",
 		"language": "python",
 		"slot": 1,
 		"sdkVersion": "V5_1_0_1_25",
 		"python": {
-			"main": "src/PID tuning.py"
+			"main": "src/main.py",
+			"requirements": [
+				"vex"
+			]
 		}
 	}
 }
