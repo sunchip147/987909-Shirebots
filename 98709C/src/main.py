@@ -730,8 +730,6 @@ def pre_autonomous():
 
 def autonomous():
     set_position(0, 0, 0)
-    test.claw(True)
-
 """### User Control"""
 
 def user_control():
