@@ -740,9 +740,9 @@ def user_control():
     while True:
 
         #Lift control
-        if controller.buttonA.pressing():
+        if controller.buttonR1.pressing():
             lift.spin(FORWARD, 95, PERCENT)
-        elif controller.buttonB.pressing():
+        elif controller.buttonR2.pressing():
             lift.spin(REVERSE, 95, PERCENT)
         else:
             lift.stop(HOLD)
