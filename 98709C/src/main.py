@@ -721,6 +721,20 @@ def five_in():
     set_drive_voltage(5)
     wait(1000, MSEC)
 
+
+def intake_pin_grab():
+    claw(False)
+    claw_wrist.spin_to_position(0, DEGREES, 95, PERCENT)
+    wait(500, MSEC)
+    lift.spin_to_position(95, PERCENT)
+    wait(500, MSEC)
+    claw(True)
+    wait(500, MSEC)
+    lift.spin_to_position(-95, PERCENT)
+    wait(500, MSEC)
+    claw_wrist.spin_to_position(0, DEGREES, 95, PERCENT)
+    wait(500, MSEC)
+
 """## Autonomous Code"""
 # --- Main Program ---
 def pre_autonomous():
@@ -738,7 +752,12 @@ def user_control():
     set_position(0, 0, 0)
 
     while True:
-
+        #Intaked Pin Macro
+        #if controller.buttonUp.pressing():
+        #    intake_pin_grab()
+        #else:
+        #    pass
+        
         #Lift control
         if controller.buttonR1.pressing():
             lift.spin(FORWARD, 95, PERCENT)
@@ -755,9 +774,9 @@ def user_control():
 
         #Control the intake
         if controller.buttonL1.pressing():
-            intake.spin(FORWARD, 95, PERCENT)
+            intake.spin(FORWARD, 65, PERCENT)
         elif controller.buttonL2.pressing():
-            intake.spin(REVERSE, 95, PERCENT)
+            intake.spin(REVERSE, 65, PERCENT)
         else:
             intake.stop(HOLD)
 
