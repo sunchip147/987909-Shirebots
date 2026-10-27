@@ -36,7 +36,7 @@ intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False) #3
 claw_piston = DigitalOut(brain.three_wire_port.h)
 
 # Odometry Sensors
-inertial_sensor = Inertial(Ports.PORT18)
+inertial_sensor = Inertial(Ports.PORT21)
 forward_tracker = Rotation(Ports.PORT5, False)
 sideways_tracker = Rotation(Ports.PORT17, False) #REMOVE THIS 
 
@@ -110,9 +110,9 @@ drive_settle_time_passed = 0
 drive_pid_runtime = 0
 
 # Drive PID Constants
-drive_kp = 0.75
+drive_kp = 2.5
 drive_ki = 0
-drive_kd = 0
+drive_kd = 7.8
 
 def drive_pid(drive_error, custom_drive_kp=drive_kp, custom_drive_ki=drive_ki, custom_drive_kd=drive_kd, drive_integral_threshold=10, drive_settle_error=2):
     global accumulated_drive_error, previous_drive_error, drive_settle_time_passed, drive_pid_runtime
@@ -140,9 +140,9 @@ turn_settle_time_passed = 0
 turn_pid_runtime = 0
 
 # Turn PID Constants
-turn_kp = 0
+turn_kp = 33
 turn_ki = 0
-turn_kd = 0
+turn_kd = 120
 
 def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_turn_kd=turn_kd, turn_integral_threshold=15, turn_settle_error=2):
     global accumulated_turn_error, previous_turn_error, turn_settle_time_passed, turn_pid_runtime
@@ -743,7 +743,15 @@ def pre_autonomous():
     inertial_sensor.calibrate()
 
 def autonomous():
+    track_position_thread = Thread(track_position)
     set_position(0, 0, 0)
+    turn_to_angle(90)
+    wait(.5,SECONDS)
+    turn_to_angle(0)
+    wait(.5,SECONDS)
+    turn_to_angle(90)
+    wait(.5,SECONDS)
+    turn_to_angle(270)
 """### User Control"""
 
 def user_control():
