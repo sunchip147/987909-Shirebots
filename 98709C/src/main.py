@@ -28,8 +28,8 @@ right_motor_2 = Motor(Ports.PORT15, GearSetting.RATIO_6_1, False)
 right_motor_3 = Motor(Ports.PORT12, GearSetting.RATIO_6_1, False) #12
 
 #Intake/scoring motors 
-lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, False) #13
-claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, False) #4
+lift = Motor(Ports.PORT13, GearSetting.RATIO_6_1, True) #13
+claw_wrist = Motor(Ports.PORT4, GearSetting.RATIO_6_1, True) #4
 intake = Motor(Ports.PORT3, GearSetting.RATIO_6_1, False) #3
 
 #claw piston
@@ -140,9 +140,9 @@ turn_settle_time_passed = 0
 turn_pid_runtime = 0
 
 # Turn PID Constants
-turn_kp = 33
+turn_kp = 1.2
 turn_ki = 0
-turn_kd = 120
+turn_kd = 10
 
 def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_turn_kd=turn_kd, turn_integral_threshold=15, turn_settle_error=2):
     global accumulated_turn_error, previous_turn_error, turn_settle_time_passed, turn_pid_runtime
@@ -164,9 +164,9 @@ def turn_pid(turn_error, custom_turn_kp=turn_kp, custom_turn_ki=turn_ki, custom_
     return turn_output
 
 #lift PID Constants
-lift_kp = 0.5
+lift_kp = 7
 lift_ki = 0.002
-lift_kd = 1
+lift_kd = 12
 
 def lift_pid(lift_error, lift_integral_threshold=10, lift_settle_error=2):
     global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
@@ -480,19 +480,17 @@ def all_red_half_wp():
 def red_right():
     #Quick right score
     #toggle(2)
-    turn_to_point(-23,72)
-    dropPin()
-    grabGroup()
-    drive_to(-22, 71)
-    turn_to_point (-24,48)
-    drive_to (-22,49)
-    scoreGroup(1)
-    turn_to_point (-24,72)
-    drive_to (-22,70)
-    grabGroup()
-    turn_to_point (-24,48)
-    drive_to (-22,49)
-    scoreGroup(2)
+    set_position(0,0,0)
+    lift_to_position(1080)
+    drive_to(0,12)
+    turn_to_point(72,24)
+    drive_to(12,18)
+    claw_wrist.spin_to_position
+    wait(.25,SECONDS)
+    claw_wrist.stop
+    claw(True)
+    
+   
 
 """Skills Route V1"""
 def skills_route_v1():
@@ -744,14 +742,7 @@ def pre_autonomous():
 
 def autonomous():
     track_position_thread = Thread(track_position)
-    set_position(0, 0, 0)
-    turn_to_angle(90)
-    wait(.5,SECONDS)
-    turn_to_angle(0)
-    wait(.5,SECONDS)
-    turn_to_angle(90)
-    wait(.5,SECONDS)
-    turn_to_angle(270)
+    red_right()
 """### User Control"""
 
 def user_control():
