@@ -1,4 +1,3 @@
-
 # ---------------------------------------------------------------------------- #
 #                                                                              #
 # 	Module:       main.py                                                      #
@@ -390,6 +389,21 @@ def claw(state):
     else:
         claw_piston.set(False)
 
+
+def autoIntakePin():
+    claw_wrist.spin_for(REVERSE, 0.5, SECONDS, 95, PERCENT)
+    claw_piston.set(True)
+    lift.spin(REVERSE, 95, PERCENT)
+    wait(1, SECONDS) 
+    claw_piston.set(False)
+    lift.spin_to_position(1020, DEGREES, 95, PERCENT)
+
+    claw_wrist.spin_to_position(0, DEGREES)
+
+def uptakePin():
+    wait(1, SECONDS)
+     
+
 def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
     global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
 
@@ -407,24 +421,44 @@ def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, 
 
     lift.stop(HOLD)
 
-def scoreGroup(groupNumber):
-    lift_to_position(90*groupNumber) #Placeholder values, will need to be tuned
+def resetLift():
+    """
+    while lift.torque() <= 1:
+        lift.spin(REVERSE, 95, PERCENT)
+        wait(0.5, SECONDS)
+        print("Lowering...")
+    """
+    lift.spin(REVERSE, 95, PERCENT)
+    wait(1, SECONDS)
+    print("Finished Function")
+    lift.stop(COAST)
+    lift.set_position(0, DEGREES)
+
+def scoreGroup(groupNumber,hasPin):
+    lift.spin_to_position(groupNumber*525, DEGREES, 95, PERCENT)#Placeholder values, will need to be tuned
+    wait(500, MSEC)
+    claw_wrist.spin(FORWARD, 95, PERCENT)
+    wait(250, MSEC)
+    claw_wrist.stop(HOLD)
+    wait(500, MSEC)
+    set_drive_voltage(4)
+    wait(500, MSEC)
+    lift.spin(REVERSE, 60, PERCENT)
+    wait(400,MSEC)
     claw(True)
-    time.sleep(0.5)
-    lift_to_position(0)
-
-def dropPin():
-    lift_to_position(45) #Placeholder value, will need to be tuned, used for the general lifting position for dropping just a pin into a goal.
-    time.sleep(0.5) 
-    claw(False) #Opens the claw to drop the pin, will need to be tuned to make sure it drops the pin without dropping the whole group.
-    time.sleep(0.5)
-
 def grabGroup():
     time.sleep(0.5)
     claw(True)
     lift.spin(FORWARD, 95, PERCENT)
 
+
+
+
 """## Auton Routes"""
+def Skills_8():
+    drive_to(0,80)
+    wait(3,SECONDS)
+    drive_brake()
 def all_red_half_wp():
     intake.spin(FORWARD, 95, PERCENT)
     #Turning to score preloads
@@ -479,18 +513,77 @@ def all_red_half_wp():
 """Red Right Route"""
 def red_right():
     #Quick right score
-    #toggle(2)
-    set_position(0,0,0)
-    lift_to_position(1080)
-    drive_to(0,12)
-    turn_to_point(72,24)
-    drive_to(12,18)
-    claw_wrist.spin_to_position
-    wait(.25,SECONDS)
+
+    #Toggle twice
+    set_position(0,8,0)
+    lift_to_position(1800)
+    claw_wrist.spin(FORWARD,95, PERCENT)
+    wait(300, MSEC)
     claw_wrist.stop
-    claw(True)
+    lift_to_position(-400)
+    set_drive_voltage(-8)
+    wait(.5,SECONDS)
+    drive_coast()
+    lift_to_position(1080, 8, 250, 1000)
+
+    #Drive first pin score
+    drive_to(0,20)
+    turn_to_angle(90)
+
+    #Align Wrist for score
+    claw_wrist.spin(FORWARD, 2, PERCENT)
+    wait(175, MSEC)
+    claw_wrist.stop(HOLD)
+
+    #Continue driving to Score
+    drive_to(14.5,26)
+    lift.stop(HOLD)
+    wait(.2,SECONDS)
+    lift_to_position(-400,8,250,1000)
+    claw_piston.set(True)
+
+    #Backing off first goal to grab pin-cup group
+    lift_to_position(-380) #Position of lift to grab cup
+    set_drive_voltage(-6)
+    wait(200, MSEC)
+
+    #turn to the wall group and grab
+    turn_to_angle(45,5)
+    drive_to()
+
+    """
+    #Align to pick up pin-cup group
+    claw_wrist.spin(REVERSE, 65, PERCENT)
+    wait(175, MSEC)
+    claw_wrist.stop(HOLD)
+    turn_to_point(-24,40)
+    drive_to(-16,38,3)
+
+    #Scoring Second Group
+    claw(False)
+    wait(200, MSEC)
+    turn_to_point(-20,30)
+    drive_to(-14.75,25.75)
+
+    #Align Wrist for score
+    claw_wrist.spin(FORWARD, 95, PERCENT)
+    wait(175, MSEC)
+    claw_wrist.stop(HOLD)
+
+    #Score
+    lift.stop(HOLD)
+    wait(.2,SECONDS)
+    lift_to_position(-400,8,250,1000)
+    claw_piston.set(True)
+    """
+
+#def red_left():
+    #continue
+
     
-   
+#def four_skills(): 
+    #wait(1,SECONDS)
+    #continue 
 
 """Skills Route V1"""
 def skills_route_v1():
@@ -740,15 +833,27 @@ def pre_autonomous():
     brain.screen.print("Pre-auton setup")
     inertial_sensor.calibrate()
 
+
+
 def autonomous():
     track_position_thread = Thread(track_position)
-    red_right()
+    lift.spin_to_position(1020, DEGREES, 95, PERCENT)
+    print("Initial Lift")
+    claw_wrist.spin_to_position(800, DEGREES, 95, PERCENT)
+    print("Claw Extenstion")
+    resetLift()
+    claw_wrist.set_position(0, DEGREES)
+    
+    
+    #red_right()
 """### User Control"""
 
 def user_control():
     # Make sure to start the position tracking thread
-    track_position_thread = Thread(track_position)
     set_position(0, 0, 0)
+    drive_coast()
+    
+
 
     while True:
         #Intaked Pin Macro
@@ -758,6 +863,7 @@ def user_control():
         #    pass
         
         #Lift control
+    
         if controller.buttonR1.pressing():
             lift.spin(FORWARD, 95, PERCENT)
         elif controller.buttonR2.pressing():
@@ -766,26 +872,28 @@ def user_control():
             lift.stop(HOLD)
 
         #Control the claw piston
-        if controller.buttonLeft.pressing():
+        if controller.buttonY.pressing():
             claw_piston.set(True)
-        elif controller.buttonRight.pressing():
+        elif controller.buttonX.pressing():
             claw_piston.set(False)
 
         #Control the intake
         if controller.buttonL1.pressing():
-            intake.spin(FORWARD, 65, PERCENT)
-        elif controller.buttonL2.pressing():
             intake.spin(REVERSE, 65, PERCENT)
+        elif controller.buttonL2.pressing():
+            intake.spin(FORWARD, 65, PERCENT)
         else:
             intake.stop(HOLD)
 
         #Control the claw wrist
-        if controller.buttonY.pressing():
-            claw_wrist.spin(FORWARD, 95, PERCENT)
-        elif controller.buttonX.pressing():
-            claw_wrist.spin(REVERSE, 95, PERCENT)
+        if controller.buttonDown.pressing():
+            #claw_wrist.spin(FORWARD, 95, PERCENT)
+            autoIntakePin()
+        elif controller.buttonUp.pressing():
+            uptakePin()
         else:
-            claw_wrist.stop(HOLD)
+            continue
+        
 
         #Drive Controls
         drive_forward = cubic(controller.axis3.position())
