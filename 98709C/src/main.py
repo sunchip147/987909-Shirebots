@@ -874,7 +874,7 @@ def user_control():
         #Control the claw piston
         if controller.buttonY.pressing():
             claw_piston.set(True)
-        elif controller.buttonX.pressing():
+        if controller.buttonX.pressing():
             claw_piston.set(False)
 
         #Control the intake
@@ -889,11 +889,10 @@ def user_control():
         if controller.buttonDown.pressing():
             #claw_wrist.spin(FORWARD, 95, PERCENT)
             autoIntakePin()
-        elif controller.buttonUp.pressing():
-            uptakePin()
-        else:
-            continue
-        
+        #elif controller.buttonUp.pressing():
+           # uptakePin()
+        #else:
+           # continue
 
         #Drive Controls
         drive_forward = cubic(controller.axis3.position())
