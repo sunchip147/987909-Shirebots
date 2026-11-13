@@ -402,7 +402,20 @@ def autoIntakePin():
 
 def uptakePin():
     wait(1, SECONDS)
+    
      
+def dance():
+    repetition = 0
+    left_motor.set_velocity(-75,PERCENT)
+    left_motor_2.set_velocity(-75,PERCENT)
+    left_motor_3.set_velocity(-75,PERCENT)
+    right_motor.set_velocity(75,PERCENT)
+    right_motor_2.set_velocity(75,PERCENT)
+    right_motor_3.set_velocity(75,PERCENT)
+    while(repetition == 5):
+        lift.spin_for(FORWARD,1.25,SECONDS)
+        lift.spin_for(REVERSE,1.25,SECONDS)
+        repetition = repetition + 1
 
 def lift_to_position(target_position, lift_max_voltage=8, lift_settle_time=500, lift_timeout=2000):
     global accumulated_lift_error, previous_lift_error, lift_settle_time_passed, lift_pid_runtime
@@ -434,18 +447,34 @@ def resetLift():
     lift.stop(COAST)
     lift.set_position(0, DEGREES)
 
-def scoreGroup(groupNumber,hasPin):
-    lift.spin_to_position(groupNumber*525, DEGREES, 95, PERCENT)#Placeholder values, will need to be tuned
-    wait(500, MSEC)
-    claw_wrist.spin(FORWARD, 95, PERCENT)
-    wait(250, MSEC)
-    claw_wrist.stop(HOLD)
-    wait(500, MSEC)
-    set_drive_voltage(4)
-    wait(500, MSEC)
-    lift.spin(REVERSE, 60, PERCENT)
-    wait(400,MSEC)
-    claw(True)
+def scoreGroup(groupNumber):
+    if(groupNumber != 0):
+        lift.spin_to_position(groupNumber*525, DEGREES, 95, PERCENT)#Placeholder values, will need to be tuned
+        wait(500, MSEC)
+        claw_wrist.spin(FORWARD, 95, PERCENT)
+        wait(250, MSEC)
+        claw_wrist.stop(HOLD)
+        wait(500, MSEC)
+        set_drive_voltage(4)
+        wait(500, MSEC)
+        lift.spin(REVERSE, 60, PERCENT)
+        wait(400,MSEC)
+        claw(True)
+    elif(groupNumber == 0):
+        lift.spin_to_position(250, DEGREES, 95, PERCENT)#Placeholder values, will need to be tuned
+        wait(500, MSEC)
+        claw_wrist.spin(FORWARD, 95, PERCENT)
+        wait(250, MSEC)
+        claw_wrist.stop(HOLD)
+        wait(500, MSEC)
+        set_drive_voltage(4)
+        wait(500, MSEC)
+        lift.spin(REVERSE, 60, PERCENT)
+        wait(400,MSEC)
+        claw(True)
+    else():
+        print("AAAAAA. WE'RE DYING. GOODBYE WORLD")
+        pass
 def grabGroup():
     time.sleep(0.5)
     claw(True)
@@ -512,10 +541,9 @@ def all_red_half_wp():
 
 """Red Right Route"""
 def red_right():
-    #Quick right score
+    set_position(0,8,0)
 
     #Toggle twice
-    set_position(0,8,0)
     lift_to_position(1800)
     claw_wrist.spin(FORWARD,95, PERCENT)
     wait(300, MSEC)
@@ -546,12 +574,35 @@ def red_right():
     lift_to_position(-380) #Position of lift to grab cup
     set_drive_voltage(-6)
     wait(200, MSEC)
+    
 
     #turn to the wall group and grab
-    turn_to_angle(45,5)
-    drive_to()
+    turn_to_angle(-45,5)
+    drive_to(-16,6)
+    #grab group
+    
+    #back up and score group
+    set_drive_voltage(-4)
+    wait(.2,SECONDS)
+    drive_coast()
+    turn_to_angle(135)
+    scoreGroup(1)
+    
+    #drive to last group, grab, and score
+    turn_to_angle(-90)
+    drive_to(-36, 12)
+    turn_to_angle(45)
+    #grab group
+    turn_to_angle(90)
+    scoreGroup(2)
+    turn_to_point(72,12)
+    
+    #drive to the matchload
+    set_drive_voltage(-6)
+    wait(2,SECONDS)
+    drive_coast()
 
-    """
+"""
     #Align to pick up pin-cup group
     claw_wrist.spin(REVERSE, 65, PERCENT)
     wait(175, MSEC)
@@ -576,6 +627,113 @@ def red_right():
     lift_to_position(-400,8,250,1000)
     claw_piston.set(True)
     """
+
+def simple_left():
+    set_position(0,8,0)
+    
+    #toggle twice
+    
+    #put preload into wall cup
+    turn_to_angle(90)
+    #drop pin
+    set_drive_voltage(-2)
+    wait(.2,SECONDS)
+    drive_coast
+    #grab group
+
+    #Score preload in cup
+    turn_to_angle(-45)
+    drive_to(20,20)
+    scoreGroup(1)
+
+    #Move to wall group and score
+    turn_to_angle(90)
+    set_drive_voltage(3)
+    wait(.5, SECONDS)
+    drive_coast()
+    #grab wall group
+    set_drive_voltage(-3)
+    wait(.5,SECONDS)
+    drive_coast()
+    turn_to_angle(-90)
+    scoreGroup(2)
+
+def one_quad():
+
+    #Auton for one quadrant 4 pin
+
+    #Score preload
+    #toggle (drive out if needed)
+    turn_to_angle(-45)
+    set_drive_voltage(5)
+    wait(.4, SECONDS)
+    drive_coast()
+    scoreGroup(0)
+    #Grab wall group and score
+    turn_to_angle(90)
+    #grab wall group (drive forward if need)
+    turn_to_angle(90)
+    scoreGroup(1)
+
+    #Drive to, grab, then score wall group
+    #Drive to wall group
+    turn_to_point(24,0)
+    drive_to(16,6)
+    #Grab wall group
+    turn_to_angle(-45)
+    scoreGroup(1)
+
+def skils_v2():
+    pins_L = 1
+    pins_R = 1
+    #Score preload
+    #!!! Set bot at 45 degree angle 
+
+
+    #toggle
+    set_drive_voltage(5)
+    wait(.5, SECONDS)
+    drive_coast()
+    set_drive_voltage(-5)
+    wait(.2, SECONDS)
+    drive_coast()
+    #Move to matchload
+    drive_to(56,12)
+    turn_to_angle(90)
+    set_drive_voltage(5)
+    wait(.5,SECONDS)
+    drive_coast()
+    #Cook (score 6 pins)
+    while(pins_L <= 7):
+        #intake with claw
+        set_drive_voltage(-5)
+        wait(.2,SECONDS)
+        drive_coast()
+        drive_to(32,16)
+        scoreGroup(pins_L)
+        drive_to(56,12)
+        turn_to_angle(75)
+        pins_L = pins_L + 1
+    #intake with claw
+    turn_to_angle(160)
+    drive_to(52,44)
+    scoreGroup(0)
+    turn_to_angle(90)
+    #grab wall group. Drive if needed
+    turn_to_angle(-90)
+    scoreGroup(1)
+    drive_to(52,30)
+    #grab group
+    turn_to_angle(90)
+    scoreGroup(2)
+
+
+
+
+""    
+#butt booty
+# - Beatrice Montania
+""
 
 #def red_left():
     #continue
@@ -879,9 +1037,9 @@ def user_control():
 
         #Control the intake
         if controller.buttonL1.pressing():
-            intake.spin(REVERSE, 65, PERCENT)
-        elif controller.buttonL2.pressing():
             intake.spin(FORWARD, 65, PERCENT)
+        elif controller.buttonL2.pressing():
+            intake.spin(REVERSE, 65, PERCENT)
         else:
             intake.stop(HOLD)
 
